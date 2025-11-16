@@ -1,0 +1,186 @@
+<div class="w-full py-7 px-4 sm:px-14 pt-20 bg-gray-50 min-h-screen">
+
+  <div class="max-w-6xl mx-auto">
+
+    <div class="mb-8">
+      <h1 class="text-3xl font-semibold text-gray-900">Dashboard</h1>
+      <p class="text-base text-gray-600 mt-1">Visão geral do seu negócio.</p>
+    </div>
+
+    @if (errorMessage && !isLoading) {
+      <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg relative mb-6 text-sm" role="alert">
+        <span class="block sm:inline">{{ errorMessage }}</span>
+      </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      @if (isLoading) {
+        @for (_ of [1,2,3,4,5,6]; track _) {
+          <app-dashboard-card [loading]="true"></app-dashboard-card>
+        }
+      } @else if (totals) {
+        <app-dashboard-card
+          title="Receita Total (Vendas)"
+          [value]="totals.totalRevenue"
+          [valueIsCurrency]="true"
+          icon="currency-dollar"
+          theme="primary">
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="Lucro Bruto"
+          [value]="totals.grossProfit"
+          [valueIsCurrency]="true"
+          icon="banknotes"
+          theme="success"
+          [subtitle]="'Custo: ' + (totals.totalCostOfGoods | currency:'BRL':'symbol':'1.2-2')">
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="Valor do Estoque (Custo)"
+          [value]="totals.totalStockValueCost"
+          [valueIsCurrency]="true"
+          icon="archive-box"
+          theme="info"
+          [subtitle]="'Valor Venda: ' + (totals.totalStockValueSale | currency:'BRL':'symbol':'1.2-2')">
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="Total de Produtos"
+          [value]="totals.productCount"
+          unit="cadastrados"
+          icon="cube"
+          theme="primary"
+          [subtitle]="totals.activeProductCount + ' ativos'">
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="Estoque Baixo / Zerado"
+          [value]="totals.lowStockCount"
+          unit="produtos"
+          icon="exclamation-triangle"
+          theme="warning"
+          [subtitle]="totals.outOfStockCount + ' zerados'">
+        </app-dashboard-card>
+
+        <app-dashboard-card
+          title="Total de Fornecedores"
+          [value]="totals.supplierCount"
+          unit="cadastrados"
+          icon="building-office"
+          theme="info">
+        </app-dashboard-card>
+
+      } @else if (!isLoading && !errorMessage) {
+         <div class="col-span-full text-center py-12 bg-white rounded-xl shadow border border-gray-100">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-slate-300 mx-auto mb-4">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm4.5 0c0 .414-.168.75-.375.75S13.5 10.164 13.5 9.75s.168-.75.375-.75.375.336.375.75Z" />
+           </svg>
+           <p class="text-slate-500">Nenhum dado disponível para exibir no dashboard.</p>
+           <p class="text-sm text-slate-400 mt-2">Cadastre produtos e realize vendas para ver as métricas.</p>
+         </div>
+      }
+
+    </div> @if (!isLoading && !errorMessage) {
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h3 class="text-lg font-semibold text-gray-800">Lucro Bruto</h3>
+            <div class="flex space-x-1 border border-gray-200 rounded-lg p-1 bg-gray-50 text-sm">
+              <button
+                (click)="setPeriod('day')"
+                [ngClass]="{
+                  'bg-white text-blue-600 shadow-sm': selectedPeriod === 'day',
+                  'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'day'
+                }"
+                class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out"
+                >Hoje</button>
+              <button
+                (click)="setPeriod('month')"
+                [ngClass]="{
+                  'bg-white text-blue-600 shadow-sm': selectedPeriod === 'month',
+                  'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'month'
+                }"
+                class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out"
+                >Este Mês</button>
+              <button
+                (click)="setPeriod('year')"
+                [ngClass]="{
+                  'bg-white text-blue-600 shadow-sm': selectedPeriod === 'year',
+                  'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'year'
+                }"
+                class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out"
+                >Este Ano</button>
+            </div>
+          </div>
+          @if(totals){
+            <div class="chart-container relative h-64 md:h-72">
+              <canvas baseChart [data]="profitChartData" [type]="profitChartType" [options]="profitChartOptions" [legend]="profitChartLegend"></canvas>
+            </div>
+          } @else { <p class="text-center text-gray-500 py-10">Calculando dados...</p> }
+        </div>
+
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h3 class="text-lg font-semibold text-gray-800">Receita Bruta</h3>
+             <div class="flex space-x-1 border border-gray-200 rounded-lg p-1 bg-gray-50 text-sm">
+              <button (click)="setPeriod('day')"   [ngClass]="{ 'bg-white text-blue-600 shadow-sm': selectedPeriod === 'day',   'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'day' }"   class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out">Hoje</button>
+              <button (click)="setPeriod('month')" [ngClass]="{ 'bg-white text-blue-600 shadow-sm': selectedPeriod === 'month', 'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'month' }" class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out">Este Mês</button>
+              <button (click)="setPeriod('year')"  [ngClass]="{ 'bg-white text-blue-600 shadow-sm': selectedPeriod === 'year',  'text-gray-600 hover:bg-gray-100': selectedPeriod !== 'year' }"  class="px-3 py-1 rounded-md font-medium transition-all duration-150 ease-in-out">Este Ano</button>
+            </div>
+          </div>
+           @if(totals){
+             <div class="chart-container relative h-64 md:h-72">
+               <canvas baseChart
+                   [data]="revenueChartData"
+                   [type]="revenueChartType"
+                   [options]="revenueChartOptions"
+                   [legend]="revenueChartLegend">
+               </canvas>
+             </div>
+          } @else { <p class="text-center text-gray-500 py-10">Calculando dados...</p> }
+        </div>
+
+      </div> }
+    @if (totals && !isLoading) {
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-6 lg:col-span-1">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Top 5 Produtos (Qtd. Vendida Mês)</h3>
+          @if(topProductsChartData.datasets[0].data.length > 0){
+            <div class="chart-container relative h-64 md:h-72">
+              <canvas baseChart
+                  [data]="topProductsChartData"
+                  [type]="topProductsChartType"
+                  [options]="topProductsChartOptions">
+              </canvas>
+            </div>
+          } @else { <p class="text-center text-gray-500 py-10">Sem vendas este mês.</p> }
+        </div>
+
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-6 lg:col-span-1">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Produtos por Categoria</h3>
+          @if(pieChartData.datasets[0].data.length > 0){
+            <div class="chart-container relative h-64 md:h-72">
+              <canvas baseChart
+                  [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [legend]="pieChartLegend">
+              </canvas>
+            </div>
+          } @else { <p class="text-center text-gray-500 py-10">Sem dados de categorias.</p> }
+        </div>
+
+        <div class="bg-white rounded-xl shadow border border-gray-100 p-6 lg:col-span-1">
+           <h3 class="text-lg font-semibold text-gray-800 mb-4">Valor do Estoque (Custo) por Categoria</h3>
+           @if(barChartData.datasets[0].data.length > 0){
+             <div class="chart-container relative h-64 md:h-72">
+               <canvas baseChart
+                   [data]="barChartData" [type]="barChartType" [options]="barChartOptions" [legend]="barChartLegend">
+               </canvas>
+             </div>
+          } @else { <p class="text-center text-gray-500 py-10">Sem dados de estoque.</p> }
+        </div>
+
+      </div> }
+    </div> </div>
