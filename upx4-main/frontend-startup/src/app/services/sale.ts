@@ -1,4 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators'; // map adicionado
@@ -15,7 +16,7 @@ import { ISalesResponse } from '../interfaces/sales-response';
 export class SaleService {
 
   private readonly _httpClient = inject(HttpClient);
-  private readonly _apiUrl = 'http://localhost:3000/api/sales'; 
+  private readonly _apiUrl = `${environment.apiUrl}/sales`; 
 
 
   createSale(saleRequest: SaleRequestDTO): Observable<SaleResponse> {

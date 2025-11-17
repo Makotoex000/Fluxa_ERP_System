@@ -1,4 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -27,7 +28,7 @@ export class ProductService {
 
   private readonly _httpClient = inject(HttpClient);
 
-  private readonly _apiUrl = 'http://localhost:3000/api/products';
+  private readonly _apiUrl = `${environment.apiUrl}/products`;
 
 
   listProducts(): Observable<IProductResponse[]> {
@@ -94,7 +95,7 @@ export class ProductService {
   adjustStock(payload: IStockAdjustmentRequest): Observable<IProductResponse> {
     // Interceptor adiciona o token
     // A API retorna { message: '..', data: produtoAtualizado }
-    return this._httpClient.post<{ message: string, data: IProductResponse }>(`${this._apiUrl}/adjust`, payload)
+    return this._httpClient.post<{ message: string, data: IProductResponse }>(`${this._apiUrl}/stock-adjustment`, payload)
       .pipe(
         map(response => response.data), // Retorna só o produto atualizado
         catchError(this.handleError)
