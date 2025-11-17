@@ -1,0 +1,14 @@
+{
+  "build": {
+    "env": {
+      "NG_CLI_ANALYTICS": "false"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "outputDirectory": "dist/frontend-startup"
+}
