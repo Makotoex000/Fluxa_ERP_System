@@ -18,7 +18,7 @@ export class SaleService {
   private readonly _httpClient = inject(HttpClient);
   private readonly _apiUrl = `${environment.apiUrl}/sales`; 
 
-
+        //forçando redeploy
   createSale(saleRequest: SaleRequestDTO): Observable<SaleResponse> {
     return this._httpClient.post<SaleResponse>(this._apiUrl, saleRequest)
       .pipe(
